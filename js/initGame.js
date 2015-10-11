@@ -25,6 +25,8 @@ function runGame(){
       game.addPlayer(data.players[player]);
     }
     game.initLocalPlayer(data.playerId);
+    console.log("map init: " + data.map);
+    game.initMap(data.map);
   });
 
 

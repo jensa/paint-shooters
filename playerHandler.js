@@ -1,19 +1,19 @@
 
 
-exports.initHandler = function(board){
-  return new PlayerHandler(board);
+exports.initHandler = function(map){
+  return new PlayerHandler(map);
 }
 
-PlayerHandler = function(board){
-  this.board = board;
+PlayerHandler = function(map){
+  this.map = map;
   this.players = [];
   this.idCounter = 0;
 }
 
 PlayerHandler.prototype.addPlayer = function(socket, callback){
   var player = {
-    x:round(this.board.width * Math.random()),
-    y:round(this.board.height * Math.random()),
+    x:round(this.map.width * Math.random()),
+    y:round(this.map.height * Math.random()),
     id:this.idCounter,
     rotation: Math.random() * 3,
     dx:0,

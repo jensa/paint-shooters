@@ -20,4 +20,6 @@ var server = app.listen(3000, function () {
 var io = require('socket.io').listen(server);
 var events = require('./event-io');
 var playerHandler = require("./playerHandler");
-events.setRoutes(io, playerHandler.initHandler({height:500, width:500}));
+
+var gameMap = {height:2000, width:2000};
+events.setRoutes(io, playerHandler.initHandler(gameMap), gameMap);

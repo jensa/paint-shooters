@@ -20,6 +20,8 @@ var keyCodes = {
   RIGHT:39
 }
 keypressed = [];
+mousePosX = 0;
+mousePosY = 0;
 
 InputHandler.prototype.up = function(){
   return keypressed[keyCodes.UP];
@@ -50,6 +52,15 @@ InputHandler.prototype.keyUp = function(e){
   keypressed[e.keyCode] = false;
 }
 
+InputHandler.prototype.mouseY = function(){
+  return mousePosY;
+}
+
+InputHandler.prototype.mouseX = function(){
+  return mousePosX;
+}
+
 InputHandler.prototype.mouseMove = function(e){
-  console.log("FUCKER MOVER");
+  mousePosX = e.clientX;
+  mousePosY = e.clientY;
 }

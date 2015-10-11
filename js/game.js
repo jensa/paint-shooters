@@ -41,34 +41,46 @@ Player.prototype.parseInput = function(inputs){
     this.dx = 0;
     this.dy = 0;
   }
+  //mouse movement
+  this.rotation = getRotationAngle(this.x+this.width/2, this.y+this.height/2, inputs.mouseX(), inputs.mouseY());
 }
 
-Player.prototype.update = function(){
+Player.prototype.update = function(map){
   var diff = Date.now() - this.lastUpdate;
 
-  this.x = this.x + this.dx * (diff/1000);
-  this.y = this.y + this.dy * (diff/1000);
 
-  // update speed (friction)
-  //this.speed = Math.max(0, this.speed - friction);
+  var newX = this.x + this.dx * (diff/1000);
+  var newY = this.y + this.dy * (diff/1000);
 
-  //this.rotation = this.rotation + 0.1;
+  if(newX > 0 && newX < map.width)
+    this.x = newX;
+  if(newY > 0 && newY < map.height)
+    this.y = newY;
 
   this.lastUpdate = Date.now();
 }
 
-Player.prototype.draw = function(canvas){
-  canvas.save();
-  var centerX = this.x+this.width/2;
-  var centerY = this.y+this.height/2 ;
-  canvas.translate(centerX, centerY);
-  canvas.rotate(this.rotation);
-  canvas.translate(-centerX, -centerY);
-  canvas.beginPath();
-  canvas.rect(this.x,this.y,this.width,this.height);
-  canvas.stroke();
-  canvas.closePath();
-  canvas.restore();
+Player.prototype.draw = function(ctx, canvas, map){
+  //canvas box: canvas.map_corner.x
+  var x = this.x - canvas.map_corner.x;
+  var y = this.y - canvas.map_corner.y;
+
+  //if the thing is outside of the box it wont be drawn.
+
+  var centerX = x+this.width/2;
+  var centerY = y+this.height/2;
+
+  ctx.save();
+  ctx.translate(centerX, centerY);
+  ctx.rotate(-(this.rotation - 180) * Math.PI / 180);
+  ctx.translate(-centerX, -centerY);
+  ctx.beginPath();
+  ctx.rect(x,y,this.width,this.height);
+  //draw a gun typ ething to mark rotation
+  ctx.rect(centerX - 3, y-3, 6, 3);
+  ctx.stroke();
+  ctx.closePath();
+  ctx.restore();
 }
 
 
@@ -87,6 +99,10 @@ Game.prototype.initLocalPlayer = function(playerId){
   this.localPlayerId = playerId;
 }
 
+Game.prototype.initMap = function(map){
+  this.map = map;
+}
+
 Game.prototype.getLocalPlayer = function(){
   return this.players[this.localPlayerId];
 }
@@ -97,13 +113,28 @@ Game.prototype.updatePlayer = function(playerdata){
 
 Game.prototype.run = function(){
   this.ctx.clear(false)
+  var player = this.players[this.localPlayerId];
+  if(!player)
+    return;
+  player.parseInput(this.inputHandler);
+  player.update(this.map);
+
+  updateCanvasCoords(player, this.canvas);
+
+  player.draw(this.ctx, this.canvas, this.map);
   for (var playerKey in this.players) {
-    var player = this.players[playerKey];
+    player = this.players[playerKey];
     if(playerKey == this.localPlayerId)
-      player.parseInput(this.inputHandler);
-    player.update();
-    player.draw(this.ctx);
+      continue;
+    player.update(this.map);
+    player.draw(this.ctx, this.canvas, this.map);
   }
+}
+
+function updateCanvasCoords(player, canvas){
+  var centerX = player.x+player.width/2;
+  var centerY = player.y+player.height/2;
+  canvas.map_corner = {x:centerX - canvas.width/2, y:centerY - canvas.height/2};
 }
 
 
@@ -113,4 +144,8 @@ function round(num){
 
 function deg2rad(deg){
   return deg * (Math.PI / 180);
+}
+
+function getRotationAngle(oldX, oldY, newX, newY){
+  return Math.atan2(newX - oldX, newY - oldY) * 180/ Math.PI;
 }
