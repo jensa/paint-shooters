@@ -84,12 +84,12 @@ Player.prototype.draw = function(ctx, canvas, map){
 }
 
 
-var Game = function(canvas){
+var Game = function(canvas, socket){
     this.players = {};
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.inputHandler = new InputHandler();
-    this.numberOfFrames = 0;
+    this.socket = socket;
 }
 
 Game.prototype.addPlayer = function(playerdata){
@@ -108,8 +108,12 @@ Game.prototype.getLocalPlayer = function(){
   return this.players[this.localPlayerId];
 }
 
-Game.prototype.updatePlayer = function(playerdata){
-    this.players[playerdata.id].changePosition(positionData);
+Game.prototype.updatePlayer = function(positionData, playerId){
+    if(!this.players)
+      return;
+    if(playerId == undefined || this.players[playerId] == undefined)
+      return;
+    this.players[playerId].changePosition(positionData);
 }
 
 Game.prototype.run = function(){
@@ -124,16 +128,13 @@ Game.prototype.run = function(){
 
   player.draw(this.ctx, this.canvas, this.map);
 
-  if(this.numberOfFrames > 20){
-    this.socket.emit('player_move', {
-      x: player.x;
-      y: player.y;
-      rotation: player.rotation;
-      dx: player.dx;
-      dy: player.dy;
+  this.socket.emit('player_move', {
+    x: player.x,
+    y: player.y,
+    rotation: player.rotation,
+    dx: player.dx,
+    dy: player.dy
     });
-    this.numberOfFrames = 0;
-  }
 
   for (var playerKey in this.players) {
     player = this.players[playerKey];
@@ -142,7 +143,6 @@ Game.prototype.run = function(){
     player.update(this.map);
     player.draw(this.ctx, this.canvas, this.map);
   }
-  this.numberOfFrames++;
 }
 
 function updateCanvasCoords(player, canvas){

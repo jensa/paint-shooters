@@ -12,12 +12,14 @@ exports.setRoutes = function(io, playerHandler, map){
     });
 
     socket.on('player_move', function (data){
+      if(thisPlayer == null)
+        return;
       thisPlayer.x = data.x;
       thisPlayer.y = data.y;
       thisPlayer.rotation = data.rotation;
       thisPlayer.dx = data.dx;
       thisPlayer.dy = data.dy;
-      socket.broadcast.emit('move', thisPlayer);
+      socket.broadcast.emit('move', {move:data, id:thisPlayer.id});
       }
     );
 

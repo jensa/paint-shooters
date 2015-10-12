@@ -4,7 +4,7 @@ function runGame(){
   var host = location.origin.replace(/^http/, 'ws')
   var socket = io(host);
   var canvas = document.getElementById("_canvas");
-  game = new Game(canvas);
+  game = new Game(canvas, socket);
   socket_global_do_not_use = socket;
   socket.emit('set_player_name', {name:document.getElementById("_name").text})
 
@@ -14,8 +14,8 @@ function runGame(){
   socket.on('player_joined', function(data){
     game.addPlayer(new Player(data.player, data.name));
   });
-  socket.on('move', function(move){
-      game.updatePlayer(move);
+  socket.on('move', function(data){
+      game.updatePlayer(data.move, data.id);
   });
   socket.on('paints', function(state){
     //do nothing so far
