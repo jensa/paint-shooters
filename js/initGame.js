@@ -1,7 +1,8 @@
 socket_global_do_not_use = null;
 var game = null;
 function runGame(){
-  var socket = io('http://localhost:3000');
+  var host = location.origin.replace(/^http/, 'ws')
+  var socket = io(host);
   var canvas = document.getElementById("_canvas");
   game = new Game(canvas);
   socket_global_do_not_use = socket;
