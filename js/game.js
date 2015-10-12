@@ -89,6 +89,7 @@ var Game = function(canvas){
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.inputHandler = new InputHandler();
+    this.numberOfFrames = 0;
 }
 
 Game.prototype.addPlayer = function(playerdata){
@@ -122,6 +123,18 @@ Game.prototype.run = function(){
   updateCanvasCoords(player, this.canvas);
 
   player.draw(this.ctx, this.canvas, this.map);
+
+  if(this.numberOfFrames > 20){
+    this.socket.emit('player_move', {
+      x: player.x;
+      y: player.y;
+      rotation: player.rotation;
+      dx: player.dx;
+      dy: player.dy;
+    });
+    this.numberOfFrames = 0;
+  }
+
   for (var playerKey in this.players) {
     player = this.players[playerKey];
     if(playerKey == this.localPlayerId)
@@ -129,6 +142,7 @@ Game.prototype.run = function(){
     player.update(this.map);
     player.draw(this.ctx, this.canvas, this.map);
   }
+  this.numberOfFrames++;
 }
 
 function updateCanvasCoords(player, canvas){
